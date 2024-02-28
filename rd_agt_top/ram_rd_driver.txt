@@ -1,0 +1,77 @@
+class ram_rd_driver extends uvm_driver #(read_xtn);
+
+	`uvm_component_utils(ram_rd_driver)
+
+	virtual ram_if.RDR_MP vif;
+
+	ram_rd_agent_config m_cfg;
+	
+	
+	
+extern function new(string name="ram_rd_driver",uvm_component parent);
+extern function void build_phase(uvm_phase phase);
+extern function void connect_phase(uvm_phase phase);		
+extern task run_phase(uvm_phase phase);
+extern task send_to_dut(read_xtn xtn);
+extern function void report_phase(uvm_phase phase);
+
+
+endclass
+
+//NEW::
+function ram_rd_driver::new(string name="ram_rd_driver",uvm_component parent);
+	super.new(name,parent);
+endfunction
+
+//BUILD_PHASE::
+
+function void ram_rd_driver::build_phase(uvm_phase phase);
+	super.build_phase(phase);
+
+	if(!uvm_config_db #(ram_rd_agent_config)::get(this,"","ram_rd_agent_config",m_cfg))
+		`uvm_fatal("CONFIG","CANNNOT GET() M_CFG FROM UVM_CONFIG_DB.HAVE YOU SET() IT?")
+endfunction
+
+//CONNECT_PHASE::
+
+function void ram_rd_driver::connect_phase(uvm_phase phase);
+	vif = m_cfg.vif;
+endfunction
+
+//RUN_PHASE::
+
+task ram_rd_driver::run_phase(uvm_phase phase);
+forever 
+	begin
+		seq_item_port.get_next_item(req);	
+		send_to_dut(req);
+		seq_item_port.item_done();
+	end
+
+endtask
+
+task ram_rd_driver::send_to_dut(read_xtn xtn);
+
+	`uvm_info("RAM_RD_DRIVER",$sformatf("printing from driver \n %s",xtn.sprint()),UVM_LOW)
+	xtn.print();
+	repeat(4)
+	@(vif.rdr_cb);
+		if(xtn.read==1'b 1)
+		vif.rdr_cb.rd_address <= xtn.rd_address;
+		vif.rdr_cb.read <= xtn.read;
+	if($test$plusargs("cont_read"))	begin
+	@(vif.rdr_cb);
+		vif.rdr_cb.rd_address <= '0;
+		vif.rdr_cb.read <= '0;
+	end
+	
+	//repeat(5)
+//	@(vif.rdr_cb);
+
+endtask
+
+function void ram_rd_driver::report_phase(uvm_phase phase);
+
+	`uvm_info(get_type_name(),$sformatf("Report: RAM Read Driver sent %0d Transactions",m_cfg.drv_data_sent_cnt),UVM_LOW)
+
+endfunction

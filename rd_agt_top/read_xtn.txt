@@ -1,0 +1,24 @@
+class read_xtn extends uvm_sequence_item;
+
+	rand bit[`ADDR_SIZE-1:0] rd_address;;
+	logic[`RAM_WIDTH-1:0] data_out;
+	rand bit read;
+
+	`uvm_object_utils_begin(read_xtn)
+		`uvm_field_int(rd_address,UVM_ALL_ON)
+		`uvm_field_int(read,UVM_ALL_ON)
+		`uvm_field_int(data_out,UVM_ALL_ON)
+	`uvm_object_utils_end
+
+
+	constraint all_c{
+			rd_address inside {[0:100]};
+			read == 1'b 1;	
+			}
+
+	function new(string name="read_xtn");
+	super.new(name);	
+	endfunction
+
+	
+endclass

@@ -1,0 +1,589 @@
+class ram_base_test extends uvm_test;
+
+   `uvm_component_utils(ram_base_test)
+
+    ram_env ram_envh;
+    ram_wr_agent_config m_ram_cfg;
+    ram_rd_agent_config m_ram_rd_cfg;
+
+    extern function new(string name = "ram_base_test" , uvm_component parent);
+    extern function void build_phase(uvm_phase phase);
+    extern function void config_ram();
+	
+ endclass
+
+//NEW::
+
+function ram_base_test::new(string name = "ram_base_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+//BUILD_PHASE::
+           
+function void ram_base_test::build_phase(uvm_phase phase);
+    m_ram_cfg=ram_wr_agent_config::type_id::create("m_ram_cfg");
+    m_ram_rd_cfg=ram_rd_agent_config::type_id::create("m_ram_rd_cfg");
+
+    config_ram();
+ 
+    uvm_config_db #(ram_wr_agent_config)::set(this,"*","ram_wr_agent_config",m_ram_cfg);
+    uvm_config_db #(ram_rd_agent_config)::set(this,"*","ram_rd_agent_config",m_ram_rd_cfg);
+    super.build_phase(phase);
+
+    ram_envh=ram_env::type_id::create("ram_envh", this);
+endfunction
+
+//CONFIG_RAM()::
+
+function void ram_base_test::config_ram();
+	m_ram_cfg.is_active = UVM_ACTIVE;
+	m_ram_rd_cfg.is_active = UVM_ACTIVE;
+	
+	if(!uvm_config_db #(virtual ram_if)::get(this,"","vif",m_ram_cfg.vif))begin
+	`uvm_fatal("VIF CONFIG","cannot get() interface vif from uvm_config_db.Have you set() it.?")
+	end
+
+	if(!uvm_config_db #(virtual ram_if)::get(this,"","vif",m_ram_rd_cfg.vif))begin
+	`uvm_fatal("VIF CONFIG","cannot get() interface vif from uvm_config_db.Have you set() it.?")
+	end
+endfunction
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+//RANDOM_ADDRESS_CLASS::
+
+class ram_random_test extends ram_base_test;
+
+    `uvm_component_utils(ram_random_test)
+
+    ram_rand_wr_xtns ram_seqh;
+
+    extern function new(string name = "ram_random_test" , uvm_component parent);
+    extern function void build_phase(uvm_phase phase);
+    extern task run_phase(uvm_phase phase);
+endclass
+
+function ram_random_test::new(string name = "ram_random_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+
+function void ram_random_test::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+endfunction
+     
+
+task ram_random_test::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+
+    ram_seqh=ram_rand_wr_xtns::type_id::create("ram_seqh");
+    ram_seqh.start(ram_envh.wr_agnth.seqrh);
+
+    phase.drop_objection(this);
+endtask   
+
+//RAM_SINGLE_ADDR_CLASS::
+
+class ram_single_addr_test extends ram_base_test;
+
+	`uvm_component_utils(ram_single_addr_test)
+	
+	ram_single_addr_wr_xtns ram_seqh;
+
+	extern function new(string name = "ram_single_addr_test" , uvm_component parent);
+    	extern function void build_phase(uvm_phase phase);
+    	extern task run_phase(uvm_phase phase);
+endclass
+
+function ram_single_addr_test::new(string name = "ram_single_addr_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+
+function void ram_single_addr_test::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+endfunction
+     
+
+task ram_single_addr_test::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+
+    ram_seqh=ram_single_addr_wr_xtns::type_id::create("ram_seqh");
+    ram_seqh.start(ram_envh.wr_agnth.seqrh);
+
+    phase.drop_objection(this);
+endtask   
+
+//RAM_CONSECUTIVE_ADDR_CLASS::
+
+class ram_ten_addr_test extends ram_base_test;
+
+	`uvm_component_utils(ram_ten_addr_test)
+	
+	ram_ten_wr_xtns ram_seqh;
+
+	extern function new(string name = "ram_ten_addr_test" , uvm_component parent);
+    	extern function void build_phase(uvm_phase phase);
+    	extern task run_phase(uvm_phase phase);
+endclass
+
+function ram_ten_addr_test::new(string name = "ram_ten_addr_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+
+function void ram_ten_addr_test::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+endfunction
+     
+
+task ram_ten_addr_test::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+
+    ram_seqh=ram_ten_wr_xtns::type_id::create("ram_seqh");
+    ram_seqh.start(ram_envh.wr_agnth.seqrh);
+
+    phase.drop_objection(this);
+endtask
+
+//RAM_ODD_ADDR_CLASS::
+
+class ram_odd_addr_test extends ram_base_test;
+
+	`uvm_component_utils(ram_odd_addr_test)
+	
+	ram_odd_wr_xtns ram_seqh;
+
+	extern function new(string name = "ram_odd_addr_test" , uvm_component parent);
+    	extern function void build_phase(uvm_phase phase);
+    	extern task run_phase(uvm_phase phase);
+endclass
+
+function ram_odd_addr_test::new(string name = "ram_odd_addr_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+
+function void ram_odd_addr_test::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+endfunction
+     
+
+task ram_odd_addr_test::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+
+    ram_seqh=ram_odd_wr_xtns::type_id::create("ram_seqh");
+    ram_seqh.start(ram_envh.wr_agnth.seqrh);
+
+    phase.drop_objection(this);
+endtask	
+
+//RAM_EVEN_ADDR_CLASS::
+
+class ram_even_addr_test extends ram_base_test;
+
+	`uvm_component_utils(ram_even_addr_test)
+	
+	ram_even_wr_xtns ram_seqh;
+
+	extern function new(string name = "ram_even_addr_test" , uvm_component parent);
+    	extern function void build_phase(uvm_phase phase);
+    	extern task run_phase(uvm_phase phase);
+endclass
+
+function ram_even_addr_test::new(string name = "ram_even_addr_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+
+function void ram_even_addr_test::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+endfunction
+     
+
+task ram_even_addr_test::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+
+    ram_seqh=ram_even_wr_xtns::type_id::create("ram_seqh");
+    ram_seqh.start(ram_envh.wr_agnth.seqrh);
+
+    phase.drop_objection(this);
+endtask
+
+//RAM_ODD_EVEN_ADDR_CLASS::
+
+class ram_odd_even_addr_test extends ram_base_test;
+
+	`uvm_component_utils(ram_odd_even_addr_test)
+	
+	ram_odd_even_wr_xtns ram_seqh;
+
+	extern function new(string name = "ram_odd_even_addr_test" , uvm_component parent);
+    	extern function void build_phase(uvm_phase phase);
+    	extern task run_phase(uvm_phase phase);
+endclass
+
+function ram_odd_even_addr_test::new(string name = "ram_odd_even_addr_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+
+function void ram_odd_even_addr_test::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+endfunction
+     
+
+task ram_odd_even_addr_test::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+
+    ram_seqh=ram_odd_even_wr_xtns::type_id::create("ram_seqh");
+    ram_seqh.start(ram_envh.wr_agnth.seqrh);
+
+    phase.drop_objection(this);
+endtask
+*/
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//READ AND WRITE TRANSATIONS::
+
+
+//RANDOM_ADDRESS_READ_WRITE_CLASS::
+
+class ram_random_write_read_test extends ram_base_test;
+
+    `uvm_component_utils(ram_random_write_read_test)
+
+    ram_rand_wr_xtns ram_wr_seqh;
+    ram_rand_rd_xtns ram_rd_seqh;
+
+
+    extern function new(string name = "ram_random_write_read_test" , uvm_component parent);
+    extern function void build_phase(uvm_phase phase);
+    extern task run_phase(uvm_phase phase);
+endclass
+
+function ram_random_write_read_test::new(string name = "ram_random_write_read_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+
+function void ram_random_write_read_test::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+endfunction
+     
+
+task ram_random_write_read_test::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+
+    ram_wr_seqh=ram_rand_wr_xtns::type_id::create("ram_wr_seqh");
+    ram_rd_seqh=ram_rand_rd_xtns::type_id::create("ram_rd_seqh");
+	
+	fork	
+		ram_wr_seqh.start(ram_envh.wr_agnth.seqrh);
+
+		ram_rd_seqh.start(ram_envh.rd_agnth.seq_h);
+	join
+    phase.drop_objection(this);
+endtask   
+
+//SINGLE ADDRESS READ WRITE CLASS::
+
+class ram_single_addr_test extends ram_base_test;	
+	`uvm_component_utils(ram_single_addr_test)
+	
+	ram_single_addr_wr_xtns ram_wr_seqh;	
+	ram_single_addr_rd_xtns ram_rd_seqh;	
+
+	extern function new(string name = "ram_single_addr_test",uvm_component parent);	
+	extern function void build_phase(uvm_phase phase);
+	extern task run_phase(uvm_phase phase);
+
+
+	function void report_phase(uvm_phase phase);
+   		uvm_report_server svr;
+   		super.report_phase(phase);
+    		svr = uvm_report_server::get_server();
+   	
+	//`uvm_info(get_type_name(), "----------TEST PASS------------------", UVM_NONE)
+ 
+	if(svr.get_severity_count(UVM_FATAL)+svr.get_severity_count(UVM_ERROR)>0) 
+		begin
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+     			`uvm_info(get_type_name(), "----            TEST_FAIL          ----", UVM_NONE)
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+    		end
+    	else 
+		begin
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+     			`uvm_info(get_type_name(), "----           TEST_PASS           ----", UVM_NONE)
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+    		end
+  	endfunction 
+
+
+endclass
+
+function ram_single_addr_test::new(string name = "ram_single_addr_test",uvm_component parent);	
+	super.new(name,parent);
+endfunction
+
+function void ram_single_addr_test::build_phase(uvm_phase phase);	
+	super.build_phase(phase);	
+endfunction
+
+task ram_single_addr_test::run_phase(uvm_phase phase);	
+ phase.raise_objection(this);
+
+    ram_wr_seqh=ram_single_addr_wr_xtns::type_id::create("ram_wr_seqh");
+    ram_rd_seqh=ram_single_addr_rd_xtns::type_id::create("ram_rd_seqh");
+	
+	fork	
+		ram_wr_seqh.start(ram_envh.wr_agnth.seqrh);
+
+		ram_rd_seqh.start(ram_envh.rd_agnth.seq_h);
+	join
+    phase.drop_objection(this);
+endtask   
+
+//CONSECUTIVE ADDRESS READ WRITE CLASS::
+
+class ram_ten_addr_test extends ram_base_test;	
+	`uvm_component_utils(ram_ten_addr_test)
+	
+	ram_ten_wr_xtns ram_wr_seqh;	
+	ram_ten_addr_rd_xtns ram_rd_seqh;	
+
+	extern function new(string name = "ram_ten_addr_test",uvm_component parent);	
+	extern function void build_phase(uvm_phase phase);
+	extern task run_phase(uvm_phase phase);
+
+	function void report_phase(uvm_phase phase);
+   		uvm_report_server svr;
+   		super.report_phase(phase);
+    		svr = uvm_report_server::get_server();
+ 
+	if(svr.get_severity_count(UVM_FATAL)+svr.get_severity_count(UVM_ERROR)>0) 
+		begin
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+     			`uvm_info(get_type_name(), "----            TEST_FAIL          ----", UVM_NONE)
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+    		end
+    	else 
+		begin
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+     			`uvm_info(get_type_name(), "----           TEST_PASS           ----", UVM_NONE)
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+    		end
+  	endfunction 
+endclass
+
+function ram_ten_addr_test::new(string name = "ram_ten_addr_test",uvm_component parent);	
+	super.new(name,parent);
+endfunction
+
+function void ram_ten_addr_test::build_phase(uvm_phase phase);	
+	super.build_phase(phase);	
+endfunction
+
+task ram_ten_addr_test::run_phase(uvm_phase phase);	
+ phase.raise_objection(this);
+
+    ram_wr_seqh=ram_ten_wr_xtns::type_id::create("ram_wr_seqh");
+    ram_rd_seqh=ram_ten_addr_rd_xtns::type_id::create("ram_rd_seqh");
+	
+	fork	
+		ram_wr_seqh.start(ram_envh.wr_agnth.seqrh);
+
+		ram_rd_seqh.start(ram_envh.rd_agnth.seq_h);
+	join
+    phase.drop_objection(this);
+endtask   
+
+//RAM_ODD_ADDR_WRITE_READ_CLASS::
+
+class ram_odd_addr_test extends ram_base_test;
+
+	`uvm_component_utils(ram_odd_addr_test)
+	
+	ram_odd_wr_xtns ram_wr_seqh;
+	ram_odd_addr_rd_xtns ram_rd_seqh;
+
+	extern function new(string name = "ram_odd_addr_test" , uvm_component parent);
+    	extern function void build_phase(uvm_phase phase);
+    	extern task run_phase(uvm_phase phase);
+
+	function void report_phase(uvm_phase phase);
+   		uvm_report_server svr;
+   		super.report_phase(phase);
+    		svr = uvm_report_server::get_server();
+ 
+	if(svr.get_severity_count(UVM_FATAL)+svr.get_severity_count(UVM_ERROR)>0) 
+		begin
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+     			`uvm_info(get_type_name(), "----            TEST_FAIL          ----", UVM_NONE)
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+    		end
+    	else 
+		begin
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+     			`uvm_info(get_type_name(), "----           TEST_PASS           ----", UVM_NONE)
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+    		end
+  	endfunction 
+
+endclass
+
+function ram_odd_addr_test::new(string name = "ram_odd_addr_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+
+function void ram_odd_addr_test::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+endfunction
+     
+
+task ram_odd_addr_test::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+
+    ram_wr_seqh=ram_odd_wr_xtns::type_id::create("ram_wr_seqh");
+	ram_rd_seqh=ram_odd_addr_rd_xtns::type_id::create("ram_rd_seqh");
+fork
+    ram_wr_seqh.start(ram_envh.wr_agnth.seqrh);
+	ram_rd_seqh.start(ram_envh.rd_agnth.seq_h);
+join
+    phase.drop_objection(this);
+endtask	
+
+
+//RAM_EVEN_ADDR_WRITE_READ_CLASS::
+
+class ram_even_addr_test extends ram_base_test;
+
+	`uvm_component_utils(ram_even_addr_test)
+	
+	ram_even_wr_xtns ram_wr_seqh;
+	ram_even_addr_rd_xtns ram_rd_seqh;
+
+	extern function new(string name = "ram_even_addr_test" , uvm_component parent);
+    	extern function void build_phase(uvm_phase phase);
+    	extern task run_phase(uvm_phase phase);
+
+	function void report_phase(uvm_phase phase);
+   		uvm_report_server svr;
+   		super.report_phase(phase);
+    		svr = uvm_report_server::get_server();
+ 
+	if(svr.get_severity_count(UVM_FATAL)+svr.get_severity_count(UVM_ERROR)>0) 
+		begin
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+     			`uvm_info(get_type_name(), "----            TEST_FAIL          ----", UVM_NONE)
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+    		end
+    	else 
+		begin
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+     			`uvm_info(get_type_name(), "----           TEST_PASS           ----", UVM_NONE)
+     			`uvm_info(get_type_name(), "---------------------------------------", UVM_NONE)
+    		end
+  	endfunction 
+
+endclass
+
+function ram_even_addr_test::new(string name = "ram_even_addr_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+
+function void ram_even_addr_test::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+endfunction
+     
+
+task ram_even_addr_test::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+
+    ram_wr_seqh=ram_even_wr_xtns::type_id::create("ram_wr_seqh");
+	ram_rd_seqh=ram_even_addr_rd_xtns::type_id::create("ram_rd_seqh");
+fork
+    ram_wr_seqh.start(ram_envh.wr_agnth.seqrh);
+	ram_rd_seqh.start(ram_envh.rd_agnth.seq_h);
+join
+    phase.drop_objection(this);
+endtask	
+
+
+	
+
+
+//RAM_ODD_EVEN_ADDR_WRITE_READ_CLASS::
+
+class ram_odd_even_addr_test extends ram_base_test;
+
+	`uvm_component_utils(ram_odd_even_addr_test)
+	
+	ram_odd_even_wr_xtns ram_wr_seqh;
+	ram_odd_even_addr_rd_xtns ram_rd_seqh;
+
+
+	extern function new(string name = "ram_odd_even_addr_test" , uvm_component parent);
+    	extern function void build_phase(uvm_phase phase);
+    	extern task run_phase(uvm_phase phase);
+endclass
+
+function ram_odd_even_addr_test::new(string name = "ram_odd_even_addr_test" , uvm_component parent);
+    super.new(name,parent);
+endfunction
+
+
+function void ram_odd_even_addr_test::build_phase(uvm_phase phase);
+    super.build_phase(phase);
+endfunction
+     
+
+task ram_odd_even_addr_test::run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+
+    ram_wr_seqh=ram_odd_even_wr_xtns::type_id::create("ram_wr_seqh");
+	ram_rd_seqh=ram_odd_even_addr_rd_xtns::type_id::create("ram_rd_seqh");
+fork
+    ram_wr_seqh.start(ram_envh.wr_agnth.seqrh);
+	ram_rd_seqh.start(ram_envh.rd_agnth.seq_h);
+join
+
+    phase.drop_objection(this);
+endtask
+//////////////////////////////////////////////////////////////////////
+class ram_six_addr_wr_test extends ram_base_test;
+	`uvm_component_utils(ram_six_addr_wr_test)
+	
+	ram_six_addr_wr_xtns ram_wr_seqh;
+	ram_six_addr_rd_xtns ram_rd_seqh;
+	
+extern function new(string name="ram_six_addr_wr_test",uvm_component parent);
+extern function void build_phase(uvm_phase phase);
+extern task run_phase(uvm_phase phase);
+
+endclass
+
+function ram_six_addr_wr_test::new(string name ="ram_six_addr_wr_test",uvm_component parent);	
+	super.new(name,parent);
+	
+endfunction
+
+function void ram_six_addr_wr_test::build_phase(uvm_phase phase);
+	super.build_phase(phase);
+	
+endfunction
+	
+task ram_six_addr_wr_test::run_phase(uvm_phase phase);
+	phase.raise_objection(this);
+		ram_wr_seqh=ram_six_addr_wr_xtns::type_id::create("ram_wr_seqh");
+		ram_rd_seqh=ram_six_addr_rd_xtns::type_id::create("ram_rd_seqh");
+
+	fork
+		ram_wr_seqh.start(ram_envh.wr_agnth.seqrh);
+		ram_rd_seqh.start(ram_envh.rd_agnth.seq_h);
+	join
+
+	phase.drop_objection(this);
+endtask
+	

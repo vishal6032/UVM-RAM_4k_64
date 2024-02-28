@@ -1,0 +1,214 @@
+
+class ram_rbase_seq extends uvm_sequence #(read_xtn);  
+	
+ 
+	`uvm_object_utils(ram_rbase_seq)  
+	
+	 extern function new(string name ="ram_rbase_seq");
+	
+endclass
+
+function ram_rbase_seq::new(string name ="ram_rbase_seq");
+	super.new(name);
+endfunction
+
+
+
+//RAM RANDOM ADDR READ::
+class ram_rand_rd_xtns extends ram_rbase_seq;
+
+	`uvm_object_utils(ram_rand_rd_xtns)
+	
+	function new(string name = "ram_rand_rd_xtns");
+		super.new(name);
+	endfunction
+
+	task body();
+		repeat(10)begin
+			req=read_xtn::type_id::create("req");	
+			start_item(req);
+			assert(req.randomize());	
+			finish_item(req);
+		end
+	endtask
+endclass
+
+
+
+//SEQUENCE::10 read txns on same address
+class ram_single_addr_rd_xtns extends ram_rbase_seq;
+
+  	
+	`uvm_object_utils(ram_single_addr_rd_xtns)
+
+	
+        extern function new(string name ="ram_single_addr_rd_xtns");
+        extern task body();
+		
+	endclass
+
+function ram_single_addr_rd_xtns::new(string name = "ram_single_addr_rd_xtns");
+	super.new(name);
+endfunction
+
+	  
+	
+task ram_single_addr_rd_xtns::body();
+    repeat(10)
+	begin
+		req=read_xtn::type_id::create("req");
+		start_item(req);
+		assert(req.randomize() with {rd_address==100;read == 1'b 1;} );
+		finish_item(req);
+                //`uvm_do(req);
+                //`uvm_do_with(req, {address == 100;}); 	
+	end
+endtask
+
+
+//10 read txns on consecutive address::
+
+class ram_ten_addr_rd_xtns extends ram_rbase_seq;
+
+  	
+	`uvm_object_utils(ram_ten_addr_rd_xtns)
+
+	
+        extern function new(string name ="ram_ten_addr_rd_xtns");
+        extern task body();
+		
+	endclass
+
+function ram_ten_addr_rd_xtns::new(string name = "ram_ten_addr_rd_xtns");
+	super.new(name);
+endfunction
+
+	  
+	
+task ram_ten_addr_rd_xtns::body();
+	int addrseq=0;
+    repeat(10)
+	begin
+		req=read_xtn::type_id::create("req");
+		start_item(req);
+		assert(req.randomize() with {rd_address==addrseq; } );
+		finish_item(req);
+		addrseq=addrseq+1;
+               	end
+endtask
+
+//10 READ txns of random data on odd address ::
+
+class ram_odd_addr_rd_xtns extends ram_rbase_seq;
+
+  	
+	`uvm_object_utils(ram_odd_addr_rd_xtns)
+
+	
+        extern function new(string name ="ram_odd_addr_rd_xtns");
+        extern task body();
+		
+	endclass
+
+function ram_odd_addr_rd_xtns::new(string name = "ram_odd_addr_rd_xtns");
+	super.new(name);
+endfunction
+
+	  
+	
+task ram_odd_addr_rd_xtns::body();
+	int addrseq=0;
+    repeat(10)
+	begin
+		req=read_xtn::type_id::create("req");
+		start_item(req);
+		assert(req.randomize() with {rd_address==(2*addrseq+1);} );
+		finish_item(req);
+		addrseq=addrseq+1;
+               	end
+endtask
+
+
+//10 READ txns of random data on even address ::
+
+class ram_even_addr_rd_xtns extends ram_rbase_seq;
+
+  	
+	`uvm_object_utils(ram_even_addr_rd_xtns)
+
+	
+        extern function new(string name ="ram_even_addr_rd_xtns");
+        extern task body();
+		
+	endclass
+
+function ram_even_addr_rd_xtns::new(string name = "ram_even_addr_rd_xtns");
+	super.new(name);
+endfunction
+
+	  
+	
+task ram_even_addr_rd_xtns::body();
+	int addrseq=0;
+    repeat(10)
+	begin
+		req=read_xtn::type_id::create("req");
+		start_item(req);
+		assert(req.randomize() with {rd_address==(2*addrseq); read == 1'b 1;} );
+		finish_item(req);
+		addrseq=addrseq+1;
+               	end
+endtask
+
+//MIXED ODD EVEN ADDR TXNS::
+
+class ram_odd_even_addr_rd_xtns extends ram_rbase_seq;
+
+	ram_even_addr_rd_xtns even_xtn;	
+	ram_odd_addr_rd_xtns odd_xtn;
+
+		`uvm_object_utils(ram_odd_even_addr_rd_xtns)
+	extern function new(string name= "ram_odd_even_addr_rd_xtns");	
+	extern task body();	
+endclass
+
+function ram_odd_even_addr_rd_xtns::new(string name = "ram_odd_even_addr_rd_xtns");
+	super.new(name);
+endfunction
+
+
+task ram_odd_even_addr_rd_xtns::body();
+	begin
+		even_xtn=ram_even_addr_rd_xtns::type_id::create("even_xtn");
+		odd_xtn=ram_odd_addr_rd_xtns::type_id::create("odd_xtn");	
+		
+	fork
+		`uvm_do(even_xtn);	
+		`uvm_do(odd_xtn);	
+	join
+	end
+endtask
+
+////////////////////////////////////////////////////////////////////////////
+class ram_six_addr_rd_xtns extends ram_rbase_seq;
+
+	`uvm_object_utils(ram_six_addr_rd_xtns)
+	
+	extern function new(string name="ram_six_addr_rd_xtns");	
+	extern task body();
+	
+endclass
+
+function ram_six_addr_rd_xtns::new(string name = "ram_six_addr_rd_xtns");
+	super.new(name);
+endfunction
+
+task ram_six_addr_rd_xtns::body();
+	repeat(10)
+	begin
+		req=read_xtn::type_id::create("req");
+		start_item(req);	
+		assert(req.randomize() with {rd_address%10 == 6;});
+		finish_item(req);	
+	end
+endtask		
